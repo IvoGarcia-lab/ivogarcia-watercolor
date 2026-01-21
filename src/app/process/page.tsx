@@ -1,12 +1,35 @@
+'use client';
+
 import Navbar from '@/components/Navbar';
 import { Droplets, Layers, Timer, Sparkles } from 'lucide-react';
-
-export const metadata = {
-    title: 'Processo & Técnica | Aquarela Vivida',
-    description: 'Descubra as técnicas tradicionais de aguarela e o processo criativo por trás de cada obra.',
-};
+import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
 
 export default function ProcessPage() {
+    const [processContent, setProcessContent] = useState<string>('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchContent() {
+            try {
+                const { data } = await supabase
+                    .from('site_content')
+                    .select('content')
+                    .eq('slug', 'process-intro')
+                    .single();
+
+                if (data) {
+                    setProcessContent(data.content);
+                }
+            } catch (err) {
+                console.error('Error fetching process content:', err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchContent();
+    }, []);
+
     return (
         <>
             <Navbar />
@@ -19,9 +42,13 @@ export default function ProcessPage() {
                             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold mb-6">
                                 Processo & Técnica
                             </h1>
-                            <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto">
-                                A arte milenar da aguarela: transparência, fluidez e emoção
-                            </p>
+                            {loading ? (
+                                <div className="h-6 bg-[var(--color-border)] rounded w-2/3 mx-auto animate-pulse"></div>
+                            ) : (
+                                <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto whitespace-pre-wrap">
+                                    {processContent || "A arte milenar da aguarela: transparência, fluidez e emoção"}
+                                </p>
+                            )}
                         </header>
 
                         {/* Steps */}

@@ -404,3 +404,106 @@ h6 {
 .stagger-5 {
   animation-delay: 0.5s;
 }
+
+/* Drip Animation */
+@keyframes liquid-flow {
+  0% {
+    filter: url(#liquid);
+  }
+
+  50% {
+    filter: url(#liquid) drop-shadow(0 4px 8px rgba(var(--color-primary), 0.3));
+  }
+
+  100% {
+    filter: url(#liquid);
+  }
+}
+
+.drip-text {
+  transition: all 0.5s ease;
+  display: inline-block;
+}
+
+.drip-text:hover {
+  animation: liquid-flow 2s ease-in-out infinite;
+  color: var(--color-primary);
+  text-shadow: 0 0 10px rgba(var(--color-primary), 0.5);
+}
+
+/* Curtain Animation */
+.curtain-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.curtain-enter-active {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.curtain-exit {
+  max-height: 500px;
+  opacity: 1;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.curtain-exit-active {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* Drip Animation */
+@keyframes liquid-flow {
+  0% {
+    filter: url(#liquid);
+  }
+
+  50% {
+    filter: url(#liquid) drop-shadow(0 4px 8px rgba(var(--color-primary), 0.3));
+  }
+
+  100% {
+    filter: url(#liquid);
+  }
+}
+
+.drip-text {
+  transition: all 0.5s ease;
+  display: inline-block;
+}
+
+.drip-text:hover {
+  animation: liquid-flow 2s ease-in-out infinite;
+  color: var(--color-primary);
+  text-shadow: 0 0 10px rgba(var(--color-primary), 0.5);
+}
+
+/* Curtain Animation */
+.curtain-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.curtain-enter-active {
+  max-height: 500px;
+  /* Arbitrary large height */
+  opacity: 1;
+}
+
+.curtain-exit {
+  max-height: 500px;
+  opacity: 1;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.curtain-exit-active {
+  max-height: 0;
+  opacity: 0;
+}

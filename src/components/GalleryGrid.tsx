@@ -19,8 +19,9 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-    const [sortBy, setSortBy] = useState<SortOption>('order');
-    const [viewMode, setViewMode] = useState<'grid' | 'list' | 'carousel'>('grid');
+    const [sortBy, setSortBy] = useState<SortOption>('year-desc');
+    const [viewMode, setViewMode] = useState<'grid' | 'list' | 'carousel'>('carousel');
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
     // Handle keyword toggle
     const handleKeywordToggle = (keyword: string) => {
@@ -93,43 +94,52 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
         <>
             {/* Controls Bar */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <FilterBar
-                    activeCategory={activeCategory}
-                    onCategoryChange={setActiveCategory}
-                />
+
+                {/* Filter Toggle Button */}
+                <button
+                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${isFiltersOpen ? 'bg-[var(--color-primary)] text-white shadow-lg' : 'bg-[var(--glass-bg)] text-[var(--color-text)] hover:bg-[var(--glass-border)]'}`}
+                >
+                    <LayoutGrid className="w-4 h-4" /> {/* Fallback icon, replace with FilterIcon if imported */}
+                    <span className="font-medium">Filtros</span>
+                    {isFiltersOpen ? <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6" /></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>}
+                </button>
 
                 <div className="flex items-center gap-3">
                     {/* Sort Dropdown */}
-                    <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as SortOption)}
-                        className="px-3 py-2 rounded-lg bg-[var(--glass-bg)] border border-[var(--glass-border)] text-sm cursor-pointer focus:outline-none focus:border-[var(--color-primary)]"
-                    >
-                        <option value="order">Ordem original</option>
-                        <option value="year-desc">Mais recentes</option>
-                        <option value="year-asc">Mais antigos</option>
-                        <option value="title">Alfabético</option>
-                    </select>
+                    <div className="flex items-center gap-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg px-3 py-2">
+                        <span className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mr-1">Ordenar</span>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as SortOption)}
+                            className="bg-transparent text-sm cursor-pointer focus:outline-none focus:text-[var(--color-primary)] font-medium"
+                        >
+                            <option value="year-desc">Mais recentes</option>
+                            <option value="year-asc">Mais antigos</option>
+                            <option value="order">Curadoria</option>
+                            <option value="title">A-Z</option>
+                        </select>
+                    </div>
 
                     {/* View Toggle */}
-                    <div className="flex rounded-lg border border-[var(--glass-border)] overflow-hidden">
+                    <div className="flex rounded-lg border border-[var(--glass-border)] overflow-hidden bg-[var(--glass-bg)]">
                         <button
                             onClick={() => setViewMode('grid')}
-                            className={`p-2 transition-colors cursor-pointer ${viewMode === 'grid' ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--glass-bg)] text-[var(--color-text-muted)]'}`}
+                            className={`p-2 transition-colors cursor-pointer ${viewMode === 'grid' ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'}`}
                             title="Vista grelha"
                         >
                             <LayoutGrid className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 transition-colors cursor-pointer ${viewMode === 'list' ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--glass-bg)] text-[var(--color-text-muted)]'}`}
+                            className={`p-2 transition-colors cursor-pointer ${viewMode === 'list' ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'}`}
                             title="Vista lista"
                         >
                             <List className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setViewMode('carousel')}
-                            className={`p-2 transition-colors cursor-pointer ${viewMode === 'carousel' ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--glass-bg)] text-[var(--color-text-muted)]'}`}
+                            className={`p-2 transition-colors cursor-pointer ${viewMode === 'carousel' ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'}`}
                             title="Vista carrossel"
                         >
                             <GalleryHorizontal className="w-4 h-4" />
@@ -138,13 +148,24 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
                 </div>
             </div>
 
-            {/* AI Keyword Filter */}
-            <KeywordFilter
-                paintings={paintings}
-                activeKeywords={activeKeywords}
-                onKeywordToggle={handleKeywordToggle}
-                onClearAll={() => setActiveKeywords([])}
-            />
+            {/* Collapsible Filter Curtain */}
+            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isFiltersOpen ? 'max-h-[500px] opacity-100 mb-8' : 'max-h-0 opacity-0'}`}>
+                <div className="p-1">
+                    <FilterBar
+                        activeCategory={activeCategory}
+                        onCategoryChange={setActiveCategory}
+                    />
+                </div>
+            </div>
+
+            <div className="mt-4">
+                <KeywordFilter
+                    paintings={paintings}
+                    activeKeywords={activeKeywords}
+                    onKeywordToggle={handleKeywordToggle}
+                    onClearAll={() => setActiveKeywords([])}
+                />
+            </div>
 
             {/* Results count */}
             <p className="text-sm text-[var(--color-text-muted)] mb-6">

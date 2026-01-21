@@ -25,9 +25,20 @@ export default function Navbar() {
                     <Palette className="w-8 h-8 text-[var(--color-primary)] transition-transform duration-300 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-[var(--color-primary)] opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
                 </div>
-                <span className="font-heading text-2xl font-semibold tracking-tight">
-                    IvoGarcia Arte
-                </span>
+                <div className="relative">
+                    <span className="font-heading text-2xl font-semibold tracking-tight relative z-10 drip-text">
+                        IvoGarcia Arte
+                    </span>
+                    {/* SVG Filter for Liquid Effect */}
+                    <svg className="absolute w-0 h-0">
+                        <defs>
+                            <filter id="liquid">
+                                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" result="warp" />
+                                <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="20" in="SourceGraphic" in2="warp" />
+                            </filter>
+                        </defs>
+                    </svg>
+                </div>
             </Link>
 
             {/* Desktop Navigation */}

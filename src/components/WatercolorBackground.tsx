@@ -25,6 +25,18 @@ export default function WatercolorBackground() {
             return;
         }
 
+        // Mouse tracking
+        const mouse = { x: 0.5, y: 0.5 };
+        const targetMouse = { x: 0.5, y: 0.5 };
+
+        const handleMouseMove = (e: MouseEvent) => {
+            if (canvas) {
+                targetMouse.x = e.clientX / canvas.width;
+                targetMouse.y = 1.0 - (e.clientY / canvas.height); // Flip Y for WebGL
+            }
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+
         // --- Shaders ---
         const vertexShaderSource = `
             attribute vec2 a_position;
@@ -44,7 +56,7 @@ export default function WatercolorBackground() {
             
             varying vec2 v_uv;
 
-            // Random and Noise functions for organic look
+            // Random and Noise functions
             float random(in vec2 _st) {
                 return fract(sin(dot(_st.xy, vec2(12.9898,78.233))) * 43758.5453123);
             }
@@ -54,7 +66,6 @@ export default function WatercolorBackground() {
                 vec2 i = floor(st);
                 vec2 f = fract(st);
 
-                // Four corners in 2D of a tile
                 float a = random(i);
                 float b = random(i + vec2(1.0, 0.0));
                 float c = random(i + vec2(0.0, 1.0));
@@ -62,20 +73,14 @@ export default function WatercolorBackground() {
 
                 vec2 u = f * f * (3.0 - 2.0 * f);
 
-                return mix(a, b, u.x) +
-                        (c - a)* u.y * (1.0 - u.x) +
-                        (d - b) * u.x * u.y;
+                return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
             }
 
             // Fractional Brownian Motion (fBm)
             float fbm(in vec2 st) {
-                // Initial values
                 float value = 0.0;
                 float amplitude = 0.5;
-                float frequency = 0.;
-                
-                // Detailed noise loop
-                for (int i = 0; i < 6; i++) {
+                for (int i = 0; i < 5; i++) {
                     value += amplitude * noise(st);
                     st *= 2.0;
                     amplitude *= 0.5;
@@ -85,63 +90,61 @@ export default function WatercolorBackground() {
 
             void main() {
                 vec2 st = gl_FragCoord.xy / u_resolution.xy;
-                
-                // Aspect ratio correction (optional, but good for consistent circles)
                 st.x *= u_resolution.x / u_resolution.y;
 
-                // Slow, graceful time variable
-                float t = u_time * 0.15;
+                float t = u_time * 0.1;
 
-                // Domain Warping for fluid effect
+                // Mouse influence
+                vec2 mouse_pos = u_mouse;
+                mouse_pos.x *= u_resolution.x / u_resolution.y;
+                float dist = distance(st, mouse_pos);
+                
+                // Interaction strength - swirl near mouse
+                float interaction = smoothstep(0.4, 0.0, dist) * 2.5;
+                
+                // Domain Warping with Mouse Interaction
                 vec2 q = vec2(0.);
-                q.x = fbm( st + 0.1 * t);
-                q.y = fbm( st + vec2(1.0));
+                q.x = fbm( st + 0.1 * t + interaction * 0.15);
+                q.y = fbm( st + vec2(1.0) - interaction * 0.15);
 
                 vec2 r = vec2(0.);
                 r.x = fbm( st + 1.0 * q + vec2(1.7, 9.2) + 0.15 * t);
                 r.y = fbm( st + 1.0 * q + vec2(8.3, 2.8) + 0.126 * t);
 
-                float f = fbm(st + r);
+                float f = fbm(st + r + (interaction * 0.3));
 
                 // Colors
-                // We mix based on the noise value 'f'
-                
-                // Light Mode / Dark Mode logic in shader or via uniform colors
-                // Here we define organic ink colors
-                
-                vec3 color1, color2, color3, bg;
+                vec3 finalColor;
 
                 if (u_dark_mode > 0.5) {
-                    // DARK MODE: Deep blues, teals, and gold accents
-                    bg = vec3(0.06, 0.09, 0.16); // Base background #0F172A
-                    color1 = vec3(0.08, 0.4, 0.45); // Teal ink
-                    color2 = vec3(0.1, 0.2, 0.5); // Deep Blue
-                    color3 = vec3(0.7, 0.5, 0.2); // Subtle Gold
+                    // DARK MODE: Deep, rich, gold accents
+                    vec3 bg = vec3(0.06, 0.09, 0.16); 
+                    vec3 color1 = vec3(0.08, 0.4, 0.45); 
+                    vec3 color2 = vec3(0.1, 0.2, 0.5); 
+                    vec3 color3 = vec3(0.8, 0.6, 0.2); // Stronger Gold
+                    
+                    vec3 color = mix(color1, color2, clamp((f*f)*4.0,0.0,1.0));
+                    color = mix(color, color3, clamp(length(q), 0.0, 1.0));
+                    color = mix(color, vec3(1.0, 0.9, 0.8), clamp(length(r.x), 0.0, 1.0) * 0.5); // sparkles
+                    
+                    finalColor = mix(bg, color, f * 0.8 + 0.2 + (interaction * 0.1));
+
                 } else {
-                    // LIGHT MODE: Soft blues, watercolor texture
-                    bg = vec3(0.97, 0.98, 0.99); // Base background
-                    color1 = vec3(0.4, 0.7, 0.9); // Light Blue ink
-                    color2 = vec3(0.5, 0.8, 0.85); // Cyan ink
-                    color3 = vec3(0.9, 0.7, 0.5); // Subtle warmth
+                    // LIGHT MODE: Significantly boosted for visibility
+                    vec3 bg = vec3(0.97, 0.98, 0.99); 
+                    
+                    // Much stronger text colors for the ink
+                    vec3 color1 = vec3(0.1, 0.5, 0.9); // Strong Blue
+                    vec3 color2 = vec3(0.0, 0.8, 0.8); // Cyan
+                    vec3 color3 = vec3(1.0, 0.6, 0.2); // Orange/Gold
+                    
+                    vec3 color = mix(color1, color2, clamp((f*f)*3.0, 0.0, 1.0));
+                    color = mix(color, color3, clamp(length(q), 0.0, 1.0));
+                    
+                    // High mix factor so it's not washed out
+                    finalColor = mix(bg, color, f * 0.7 + 0.15 + (interaction * 0.1));
                 }
-
-                // Mixing the colors based on warped noise
-                vec3 color = mix(color1, color2, clamp((f*f)*4.0,0.0,1.0));
                 
-                // Add secondary accent
-                color = mix(color, color3, clamp(length(q), 0.0, 1.0));
-
-                // Add intensity bloom
-                color = mix(color, vec3(0.9), clamp(length(r.x), 0.0, 1.0));
-
-                // Soft mix with background so it's not too overwhelming
-                // The 'ink' should be subtle
-                vec3 finalColor = mix(bg, color, f * 1.2 + 0.1);
-                
-                // Vignette for focus
-                // float vignette = 1.0 - smoothstep(0.5, 1.5, length(v_uv - 0.5));
-                // finalColor *= vignette;
-
                 gl_FragColor = vec4(finalColor, 1.0);
             }
         `;
@@ -182,14 +185,9 @@ export default function WatercolorBackground() {
         // --- Attributes & Uniforms ---
         const positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        // Full screen quad (-1 to 1)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-            -1, -1,
-            1, -1,
-            -1, 1,
-            -1, 1,
-            1, -1,
-            1, 1,
+            -1, -1, 1, -1, -1, 1,
+            -1, 1, 1, -1, 1, 1,
         ]), gl.STATIC_DRAW);
 
         const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -198,6 +196,7 @@ export default function WatercolorBackground() {
 
         const timeLocation = gl.getUniformLocation(program, 'u_time');
         const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+        const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
         const darkModeLocation = gl.getUniformLocation(program, 'u_dark_mode');
 
         // --- Resize Handler ---
@@ -205,12 +204,8 @@ export default function WatercolorBackground() {
             if (!canvas || !containerRef.current) return;
             const width = containerRef.current.clientWidth;
             const height = containerRef.current.clientHeight;
-
-            // Set canvas size to display size
             canvas.width = width;
             canvas.height = height;
-
-            // Set viewport to match
             gl.viewport(0, 0, width, height);
 
             if (resolutionLocation) {
@@ -228,7 +223,12 @@ export default function WatercolorBackground() {
         const render = () => {
             const currentTime = (performance.now() - startTime) / 1000;
 
+            // Smooth mouse interpolation
+            mouse.x += (targetMouse.x - mouse.x) * 0.05;
+            mouse.y += (targetMouse.y - mouse.y) * 0.05;
+
             if (timeLocation) gl.uniform1f(timeLocation, currentTime);
+            if (mouseLocation) gl.uniform2f(mouseLocation, mouse.x, mouse.y);
             if (darkModeLocation) gl.uniform1f(darkModeLocation, theme === 'dark' ? 1.0 : 0.0);
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -239,6 +239,7 @@ export default function WatercolorBackground() {
 
         return () => {
             window.removeEventListener('resize', resize);
+            window.removeEventListener('mousemove', handleMouseMove);
             cancelAnimationFrame(animationFrameId);
             gl.deleteProgram(program);
         };
@@ -246,9 +247,6 @@ export default function WatercolorBackground() {
 
     return (
         <div ref={containerRef} className="fixed inset-0 -z-50 pointer-events-none w-full h-full">
-            {/* Overlay for grain/texture (optional CSS embellishment) */}
-            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.95\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }} />
-
             <canvas ref={canvasRef} className="w-full h-full block" />
         </div>
     );

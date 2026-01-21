@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { Mail, MapPin, Phone, Send, Instagram, Facebook } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function ContactPage() {
+    const [contactContent, setContactContent] = useState<string>('');
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -13,6 +16,27 @@ export default function ContactPage() {
     });
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(false);
+
+    useEffect(() => {
+        async function fetchContent() {
+            try {
+                const { data } = await supabase
+                    .from('site_content')
+                    .select('content')
+                    .eq('slug', 'contact-info')
+                    .single();
+
+                if (data) {
+                    setContactContent(data.content);
+                }
+            } catch (err) {
+                console.error('Error fetching contact content:', err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchContent();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,10 +64,13 @@ export default function ContactPage() {
                             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold mb-6">
                                 Contacto
                             </h1>
-                            <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto">
-                                Interessado em adquirir uma obra ou encomendar uma pintura personalizada?
-                                Entre em contacto.
-                            </p>
+                            {loading ? (
+                                <div className="h-6 bg-[var(--color-border)] rounded w-2/3 mx-auto animate-pulse"></div>
+                            ) : (
+                                <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto whitespace-pre-wrap">
+                                    {contactContent || "Interessado em adquirir uma obra ou encomendar uma pintura personalizada? Entre em contacto."}
+                                </p>
+                            )}
                         </header>
 
                         <div className="grid lg:grid-cols-5 gap-8">
@@ -57,10 +84,10 @@ export default function ContactPage() {
                                         <div>
                                             <h3 className="font-medium mb-1">Email</h3>
                                             <a
-                                                href="mailto:contato@aquarelavivida.com"
+                                                href="mailto:contato@ivogarcia.pt"
                                                 className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
                                             >
-                                                contato@aquarelavivida.com
+                                                contato@ivogarcia.pt
                                             </a>
                                         </div>
                                     </div>
@@ -204,7 +231,7 @@ export default function ContactPage() {
                 {/* Footer */}
                 <footer className="px-4 md:px-8 lg:px-12 py-8 border-t border-[var(--color-border)]">
                     <div className="max-w-7xl mx-auto text-center text-[var(--color-text-muted)] text-sm">
-                        <p>© {new Date().getFullYear()} Aquarela Vivida. Todos os direitos reservados.</p>
+                        <p>© {new Date().getFullYear()} IvoGarcia Arte. Todos os direitos reservados.</p>
                     </div>
                 </footer>
             </main>
