@@ -215,6 +215,56 @@ export default function AdminPage() {
         }
     };
 
+    // Manual AI Retry Handler
+    const handleRetryAI = async (painting: Painting) => {
+        if (!isAIConfigured()) {
+            alert('API Key não configurada');
+            return;
+        }
+
+        const confirmRetry = window.confirm(`Reanalisar "${painting.title}" com IA?`);
+        if (!confirmRetry) return;
+
+        setAnalyzing(true);
+        try {
+            console.log('Starting manual AI analysis for:', painting.image_url);
+            const analysis = await analyzePainting(painting.image_url);
+
+            if (analysis) {
+                const { error } = await supabase
+                    .from('paintings')
+                    .update({
+                        ai_description: analysis.description,
+                        ai_keywords: analysis.keywords,
+                        ai_mood: analysis.mood,
+                        ai_colors: analysis.colors,
+                    })
+                    .eq('id', painting.id);
+
+                if (error) throw error;
+
+                // Update local state
+                setPaintings(paintings.map(p =>
+                    p.id === painting.id ? {
+                        ...p,
+                        ai_description: analysis.description,
+                        ai_keywords: analysis.keywords,
+                        ai_mood: analysis.mood,
+                        ai_colors: analysis.colors
+                    } : p
+                ));
+                alert('Análise IA concluída com sucesso!');
+            } else {
+                throw new Error('Falha na resposta da IA');
+            }
+        } catch (err) {
+            console.error('AI Retry Error:', err);
+            alert('Erro na análise IA: ' + (err instanceof Error ? err.message : 'Erro desconhecido'));
+        } finally {
+            setAnalyzing(false);
+        }
+    };
+
     // Login Screen
     if (!isAuthenticated) {
         return (
@@ -590,6 +640,18 @@ export default function AdminPage() {
                                             >
                                                 <Trash2 className="w-5 h-5" />
                                             </button>
+
+                                            {/* Retry AI Button */}
+                                            {isAIConfigured() && (!painting.ai_description || !painting.ai_keywords) && (
+                                                <button
+                                                    onClick={() => handleRetryAI(painting)}
+                                                    className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-lg transition-colors cursor-pointer"
+                                                    title="Gerar Análise IA"
+                                                    disabled={analyzing}
+                                                >
+                                                    <Sparkles className={`w-5 h-5 ${analyzing ? 'animate-spin' : ''}`} />
+                                                </button>
+                                            )}
                                         </>
                                     )}
                                 </div>

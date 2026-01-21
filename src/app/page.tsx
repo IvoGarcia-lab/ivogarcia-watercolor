@@ -17,7 +17,7 @@ async function getPaintings(): Promise<Painting[]> {
   return data || [];
 }
 
-export const revalidate = 60; // Revalidate every 60 seconds
+export const revalidate = 0; // Disable cache for instant updates
 
 export default async function Home() {
   const paintings = await getPaintings();
