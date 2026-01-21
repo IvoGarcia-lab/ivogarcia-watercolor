@@ -5,9 +5,6 @@ import { Paintbrush, Heart, Award, BookOpen, Facebook, Instagram, Mail } from 'l
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 
-// Client component, so we remove the metadata export or move it to layout/separate file
-// For simplicity in this structure, we'll keep the component client-side.
-
 export default function AuthorPage() {
     const [bioContent, setBioContent] = useState<string>('');
     const [loading, setLoading] = useState(true);
@@ -34,13 +31,13 @@ export default function AuthorPage() {
     }, []);
 
     return (
-        <>
+        <div className="min-h-screen bg-[var(--color-bg)]">
             <Navbar />
 
             <div className="relative z-10 px-4 md:px-8 lg:px-12 py-20 lg:py-32">
                 <div className="max-w-5xl mx-auto">
 
-                    {/* Header Section - Minimalist & Sober */}
+                    {/* Header Section */}
                     <header className="mb-24 text-center">
                         <span className="inline-block py-1 px-3 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-medium tracking-widest uppercase mb-6">
                             O Artista
@@ -50,14 +47,14 @@ export default function AuthorPage() {
                         </h1>
                         <div className="w-24 h-1 bg-[var(--color-primary)] mx-auto mb-8 opacity-50"></div>
                         <p className="text-xl md:text-2xl text-[var(--color-text-muted)] font-light max-w-3xl mx-auto leading-relaxed">
-                            "A aguarela é a arte de capturar a luz e a memória, onde cada pincelada é um diálogo entre o controle e o imprevisível."
+                            &quot;A aguarela e a arte de capturar a luz e a memoria...&quot;
                         </p>
                     </header>
 
-                    {/* Main Content - Split Layout with overlap */}
+                    {/* Main Content */}
                     <div className="grid lg:grid-cols-12 gap-12 items-start mb-24">
 
-                        {/* Bio Content - Wider Column */}
+                        {/* Bio Content */}
                         <div className="lg:col-span-7 lg:order-2">
                             <div className="glass p-10 md:p-14 rounded-2xl border border-[var(--glass-border)] shadow-2xl backdrop-blur-2xl">
                                 <h2 className="font-heading text-3xl mb-8 flex items-center gap-3">
@@ -75,7 +72,7 @@ export default function AuthorPage() {
                                 ) : (
                                     <div className="prose prose-lg max-w-none text-[var(--color-text-muted)] leading-relaxed font-light">
                                         <div className="whitespace-pre-wrap">
-                                            {bioContent || "O conteúdo biográfico está a carregar..."}
+                                            {bioContent || "O conteudo biografico esta a carregar..."}
                                         </div>
                                     </div>
                                 )}
@@ -83,7 +80,7 @@ export default function AuthorPage() {
                                 <div className="mt-12 flex items-center gap-6 pt-8 border-t border-[var(--glass-border)]">
                                     <div className="flex flex-col">
                                         <span className="text-3xl font-heading font-bold text-[var(--color-primary)]">15+</span>
-                                        <span className="text-xs uppercase tracking-wider opacity-60">Anos de Experiência</span>
+                                        <span className="text-xs uppercase tracking-wider opacity-60">Anos de Experiencia</span>
                                     </div>
                                     <div className="w-[1px] h-10 bg-[var(--glass-border)]"></div>
                                     <div className="flex flex-col">
@@ -94,7 +91,7 @@ export default function AuthorPage() {
                             </div>
                         </div>
 
-                        {/* Sidebar / Profile - Narrower Column */}
+                        {/* Sidebar */}
                         <div className="lg:col-span-5 lg:order-1 sticky top-32">
                             <div className="glass p-8 rounded-2xl border border-[var(--glass-border)] text-center relative overflow-hidden group">
                                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
@@ -120,12 +117,12 @@ export default function AuthorPage() {
                         </div>
                     </div>
 
-                    {/* Philosophy Section */}
+                    {/* Philosophy */}
                     <div className="grid md:grid-cols-3 gap-8 mb-20">
                         {[
-                            { icon: Paintbrush, title: "Técnica", desc: "Domínio exclusivo da aguarela, explorando a transparência e a luz natural." },
-                            { icon: Heart, title: "Emoção", desc: "Cada obra é um reflexo sincero de um momento, sentimento ou atmosfera." },
-                            { icon: Award, title: "Legado", desc: "Obras presentes em coleções privadas por toda a Europa." }
+                            { icon: Paintbrush, title: "Tecnica", desc: "Dominio exclusivo da aguarela..." },
+                            { icon: Heart, title: "Emocao", desc: "Cada obra e um reflexo sincero..." },
+                            { icon: Award, title: "Legado", desc: "Obras presentes em colecoes privadas..." }
                         ].map((item, idx) => (
                             <div key={idx} className="glass p-8 rounded-xl border border-[var(--glass-border)] hover:border-[var(--color-primary)]/30 transition-colors duration-300 group">
                                 <item.icon className="w-8 h-8 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] transition-colors mb-4" />
@@ -143,10 +140,9 @@ export default function AuthorPage() {
             {/* Footer */}
             <footer className="px-4 md:px-8 lg:px-12 py-8 border-t border-[var(--color-border)]">
                 <div className="max-w-7xl mx-auto text-center text-[var(--color-text-muted)] text-sm">
-                    <p>© {new Date().getFullYear()} IvoGarcia Arte. Todos os direitos reservados.</p>
+                    <p>&copy; {new Date().getFullYear()} IvoGarcia Arte. Todos os direitos reservados.</p>
                 </div>
             </footer>
-        </main >
-        </>
+        </div>
     );
 }
