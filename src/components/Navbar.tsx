@@ -26,7 +26,7 @@ export default function Navbar() {
                     <div className="absolute inset-0 bg-[var(--color-primary)] opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
                 </div>
                 <span className="font-heading text-2xl font-semibold tracking-tight">
-                    Aquarela Vivida
+                    IvoGarcia Arte
                 </span>
             </Link>
 
@@ -39,8 +39,8 @@ export default function Navbar() {
                             key={link.href}
                             href={link.href}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${isActive
-                                    ? 'bg-[var(--color-primary)] text-white'
-                                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
+                                ? 'bg-[var(--color-primary)] text-white'
+                                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
                                 }`}
                         >
                             {link.label}
@@ -82,8 +82,8 @@ export default function Navbar() {
                                     href={link.href}
                                     onClick={() => setMobileMenuOpen(false)}
                                     className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${isActive
-                                            ? 'bg-[var(--color-primary)] text-white'
-                                            : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
+                                        ? 'bg-[var(--color-primary)] text-white'
+                                        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
                                         }`}
                                 >
                                     {link.label}

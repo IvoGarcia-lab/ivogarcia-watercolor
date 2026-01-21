@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, Calendar, Ruler, Paintbrush } from 'lucide-react';
 import type { Painting } from '@/types/painting';
@@ -25,6 +25,8 @@ export default function Lightbox({
     hasNext
 }: LightboxProps) {
 
+    const [controlsVisible, setControlsVisible] = useState(true);
+
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (!isOpen) return;
 
@@ -42,28 +44,40 @@ export default function Lightbox({
     }, [isOpen, onClose, onPrev, onNext, hasPrev, hasNext]);
 
     useEffect(() => {
-        document.addEventListener('keydown', handleKeyDown);
+        let timeout: NodeJS.Timeout;
+        const resetTimer = () => {
+            setControlsVisible(true);
+            clearTimeout(timeout);
+            timeout = setTimeout(() => setControlsVisible(false), 5000);
+        };
 
         if (isOpen) {
+            document.addEventListener('mousemove', resetTimer);
+            document.addEventListener('keydown', handleKeyDown); // Combined listener setup
             document.body.style.overflow = 'hidden';
+            resetTimer();
+        } else {
+            document.body.style.overflow = '';
         }
 
         return () => {
+            document.removeEventListener('mousemove', resetTimer);
             document.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = '';
+            clearTimeout(timeout);
         };
-    }, [handleKeyDown, isOpen]);
+    }, [isOpen, handleKeyDown]);
 
     if (!painting) return null;
 
     return (
         <div
-            className={`lightbox ${isOpen ? 'open' : ''}`}
+            className={`lightbox ${isOpen ? 'open' : ''} ${controlsVisible ? 'cursor-default' : 'cursor-none'}`}
             onClick={onClose}
         >
             {/* Close Button */}
             <button
-                className="absolute top-4 right-4 p-3 text-white/80 hover:text-white transition-colors z-10 cursor-pointer"
+                className={`absolute top-4 right-4 p-3 text-white/80 hover:text-white transition-opacity duration-500 z-10 cursor-pointer ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
                 aria-label="Fechar"
             >
@@ -73,7 +87,7 @@ export default function Lightbox({
             {/* Navigation Arrows */}
             {hasPrev && (
                 <button
-                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/60 hover:text-white transition-colors cursor-pointer"
+                    className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/60 hover:text-white transition-opacity duration-500 cursor-pointer ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}
                     onClick={(e) => { e.stopPropagation(); onPrev(); }}
                     aria-label="Anterior"
                 >
@@ -83,7 +97,7 @@ export default function Lightbox({
 
             {hasNext && (
                 <button
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/60 hover:text-white transition-colors cursor-pointer"
+                    className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/60 hover:text-white transition-opacity duration-500 cursor-pointer ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}
                     onClick={(e) => { e.stopPropagation(); onNext(); }}
                     aria-label="Próximo"
                 >
@@ -106,7 +120,7 @@ export default function Lightbox({
                 />
 
                 {/* Info Panel */}
-                <div className="lightbox-info rounded-b-lg">
+                <div className={`lightbox-info rounded-b-lg transition-opacity duration-700 ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}>
                     <h2 className="font-heading text-2xl mb-2">{painting.title}</h2>
 
                     <div className="flex flex-wrap gap-4 text-sm text-white/80 mb-3">

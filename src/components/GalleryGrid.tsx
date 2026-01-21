@@ -5,8 +5,9 @@ import PaintingCard from './PaintingCard';
 import FilterBar from './FilterBar';
 import KeywordFilter from './KeywordFilter';
 import Lightbox from './Lightbox';
+import GalleryCarousel from './GalleryCarousel';
 import type { Painting } from '@/types/painting';
-import { LayoutGrid, List, SortAsc, SortDesc } from 'lucide-react';
+import { LayoutGrid, List, SortAsc, SortDesc, GalleryHorizontal } from 'lucide-react';
 
 interface GalleryGridProps {
     paintings: Painting[];
@@ -19,7 +20,7 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
     const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [sortBy, setSortBy] = useState<SortOption>('order');
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [viewMode, setViewMode] = useState<'grid' | 'list' | 'carousel'>('grid');
 
     // Handle keyword toggle
     const handleKeywordToggle = (keyword: string) => {
@@ -49,10 +50,20 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
         // Sort
         switch (sortBy) {
             case 'year-asc':
-                result.sort((a, b) => (a.year || 0) - (b.year || 0));
+                result.sort((a, b) => {
+                    const yearDiff = (a.year || 0) - (b.year || 0);
+                    if (yearDiff !== 0) return yearDiff;
+                    // Secondary sort by created_at for stability
+                    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                });
                 break;
             case 'year-desc':
-                result.sort((a, b) => (b.year || 0) - (a.year || 0));
+                result.sort((a, b) => {
+                    const yearDiff = (b.year || 0) - (a.year || 0);
+                    if (yearDiff !== 0) return yearDiff;
+                    // Secondary sort by created_at for stability
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                });
                 break;
             case 'title':
                 result.sort((a, b) => a.title.localeCompare(b.title));
@@ -116,6 +127,13 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
                         >
                             <List className="w-4 h-4" />
                         </button>
+                        <button
+                            onClick={() => setViewMode('carousel')}
+                            className={`p-2 transition-colors cursor-pointer ${viewMode === 'carousel' ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--glass-bg)] text-[var(--color-text-muted)]'}`}
+                            title="Vista carrossel"
+                        >
+                            <GalleryHorizontal className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -152,7 +170,7 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
                         />
                     ))}
                 </div>
-            ) : (
+            ) : viewMode === 'list' ? (
                 <div className="space-y-4">
                     {filteredPaintings.map((painting, index) => (
                         <div
@@ -191,6 +209,12 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
                         </div>
                     ))}
                 </div>
+            ) : (
+                /* Carousel View */
+                <GalleryCarousel
+                    paintings={filteredPaintings}
+                    onSelect={(index) => setSelectedIndex(index)}
+                />
             )}
 
             <Lightbox

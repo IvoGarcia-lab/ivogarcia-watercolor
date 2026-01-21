@@ -1,0 +1,17 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Run every 5 days at 00:00 UTC
+    - cron: '0 0 */5 * *'
+  workflow_dispatch: # Allows manual run
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Keep-Alive Endpoint
+        run: |
+          curl -f -X GET "https://ivogarciarte.3dhr.pt/api/keep-alive" \
+          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          -H "User-Agent: GitHub-Actions-Keep-Alive/1.0"

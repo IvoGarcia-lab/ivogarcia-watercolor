@@ -32,7 +32,7 @@ export default async function Home() {
           <div className="max-w-7xl mx-auto">
             <header className="text-center mb-12 md:mb-16">
               <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold mb-4 opacity-0 animate-fade-in">
-                Galeria de Aguarelas
+                IvoGarcia Arte
               </h1>
               <p className="text-[var(--color-text-muted)] text-lg md:text-xl max-w-2xl mx-auto opacity-0 animate-fade-in stagger-1">
                 Uma coleção de pinturas criadas com a arte tradicional da aguarela,
@@ -58,7 +58,7 @@ export default async function Home() {
         {/* Footer */}
         <footer className="px-4 md:px-8 lg:px-12 py-8 border-t border-[var(--color-border)]">
           <div className="max-w-7xl mx-auto text-center text-[var(--color-text-muted)] text-sm">
-            <p>© {new Date().getFullYear()} Aquarela Vivida. Todos os direitos reservados.</p>
+            <p>© {new Date().getFullYear()} IvoGarcia Arte. Todos os direitos reservados.</p>
           </div>
         </footer>
       </main>

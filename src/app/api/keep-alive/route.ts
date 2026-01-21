@@ -6,9 +6,10 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
     // Verify secret to prevent abuse
     const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
     const expectedToken = process.env.CRON_SECRET || 'keep-alive-secret';
 
-    if (authHeader !== `Bearer ${expectedToken}`) {
+    if (token !== expectedToken) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -19,13 +19,13 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Aquarela Vivida | Galeria de Aguarelas",
-  description: "Galeria interativa de pinturas a aguarela. Descubra obras únicas com técnicas tradicionais de watercolor.",
-  keywords: ["aguarela", "watercolor", "pintura", "arte", "galeria", "Portugal"],
-  authors: [{ name: "Aquarela Vivida" }],
+  title: "IvoGarcia Arte | Galeria de Aguarelas",
+  description: "Galeria interativa de pinturas a aguarela por Ivo Garcia.",
+  keywords: ["aguarela", "watercolor", "pintura", "arte", "galeria", "Portugal", "Ivo Garcia"],
+  authors: [{ name: "Ivo Garcia" }],
   openGraph: {
-    title: "Aquarela Vivida | Galeria de Aguarelas",
-    description: "Galeria interativa de pinturas a aguarela",
+    title: "IvoGarcia Arte | Galeria de Aguarelas",
+    description: "Galeria interativa de pinturas a aguarela por Ivo Garcia",
     type: "website",
     locale: "pt_PT",
   },

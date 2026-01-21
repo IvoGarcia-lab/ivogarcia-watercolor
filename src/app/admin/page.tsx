@@ -270,7 +270,7 @@ export default function AdminPage() {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
                 <div className="glass-card p-8 w-full max-w-md">
-                    <h1 className="font-heading text-3xl text-center mb-8">Administração</h1>
+                    <h1 className="font-heading text-3xl text-center mb-8">IvoGarcia Arte - Admin</h1>
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
