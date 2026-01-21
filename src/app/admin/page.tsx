@@ -89,22 +89,13 @@ export default function AdminPage() {
                 .from(PAINTINGS_BUCKET)
                 .getPublicUrl(fileName);
 
-            // AI Analysis - convert file to base64 and analyze
+            // AI Analysis - send public URL to AI/ML API
             let aiData = {};
             if (isAIConfigured()) {
                 setAnalyzing(true);
                 try {
-                    const reader = new FileReader();
-                    const base64Promise = new Promise<string>((resolve) => {
-                        reader.onload = () => {
-                            const base64 = (reader.result as string).split(',')[1];
-                            resolve(base64);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-
-                    const base64 = await base64Promise;
-                    const analysis = await analyzePainting(base64);
+                    console.log('Starting AI analysis for:', publicUrl);
+                    const analysis = await analyzePainting(publicUrl);
 
                     if (analysis) {
                         aiData = {
