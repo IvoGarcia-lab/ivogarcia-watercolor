@@ -42,14 +42,30 @@ export default function ContactPage() {
         e.preventDefault();
         setSending(true);
 
-        // Simulate sending - in production, integrate with email service
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
 
-        setSending(false);
-        setSent(true);
-        setFormData({ name: '', email: '', subject: '', message: '' });
+            const data = await response.json();
 
-        setTimeout(() => setSent(false), 5000);
+            if (response.ok) {
+                setSent(true);
+                setFormData({ name: '', email: '', subject: '', message: '' });
+                setTimeout(() => setSent(false), 5000);
+            } else {
+                alert(data.error || 'Erro ao enviar mensagem.');
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            alert('Erro de conexão ao enviar mensagem.');
+        } finally {
+            setSending(false);
+        }
     };
 
     return (

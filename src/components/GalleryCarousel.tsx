@@ -35,6 +35,22 @@ export default function GalleryCarousel({ paintings, onSelect }: GalleryCarousel
         }
     };
 
+    const [isPaused, setIsPaused] = useState(false);
+
+    useEffect(() => {
+        if (isPaused) return;
+
+        const interval = setInterval(() => {
+            if (activeIndex < paintings.length - 1) {
+                scrollToIndex(activeIndex + 1);
+            } else {
+                scrollToIndex(0); // Loop back to start
+            }
+        }, 4000); // 4 seconds
+
+        return () => clearInterval(interval);
+    }, [activeIndex, isPaused, paintings.length]);
+
     const handlePrev = () => {
         if (activeIndex > 0) {
             scrollToIndex(activeIndex - 1);
@@ -42,7 +58,11 @@ export default function GalleryCarousel({ paintings, onSelect }: GalleryCarousel
     };
 
     return (
-        <div className="relative w-full py-12">
+        <div
+            className="relative w-full py-12"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+        >
 
             {/* Navigation Buttons */}
             <button

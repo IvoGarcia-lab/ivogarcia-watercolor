@@ -18,6 +18,15 @@ export interface Painting {
   ai_keywords: string[] | null;
   ai_mood: string | null;
   ai_colors: string[] | null;
+  gallery_images?: PaintingGalleryImage[];
+}
+
+export interface PaintingGalleryImage {
+  id: string;
+  painting_id: string;
+  image_url: string;
+  display_order: number;
+  created_at: string;
 }
 
 export interface PaintingFormData {

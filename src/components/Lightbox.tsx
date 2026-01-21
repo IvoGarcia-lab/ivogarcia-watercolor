@@ -2,11 +2,12 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import Image from 'next/image';
-import { X, ChevronLeft, ChevronRight, Calendar, Ruler, Paintbrush } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Calendar, Ruler, Paintbrush, Maximize, Minimize } from 'lucide-react';
 import type { Painting } from '@/types/painting';
 import { supabase } from '@/lib/supabase';
 import StarRating from './StarRating';
 import CommentSection from './CommentSection';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 interface LightboxProps {
     painting: Painting | null;
@@ -28,6 +29,8 @@ export default function Lightbox({
     hasNext
 }: LightboxProps) {
     const [controlsVisible, setControlsVisible] = useState(true);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [activeImage, setActiveImage] = useState<string | null>(null);
 
     // Social State
     const [userRating, setUserRating] = useState<number>(0);
@@ -76,6 +79,7 @@ export default function Lightbox({
         if (isOpen && painting) {
             fetchRatings();
             setUserRating(0); // Reset user rating for new painting view
+            setActiveImage(null); // Reset active image
         }
     }, [isOpen, painting, fetchRatings]);
 
@@ -87,72 +91,100 @@ export default function Lightbox({
                 onClose();
                 break;
             case 'ArrowLeft':
-                if (hasPrev) onPrev();
+                onPrev();
                 break;
             case 'ArrowRight':
-                if (hasNext) onNext();
-                break;
-        }
-    }, [isOpen, onClose, onPrev, onNext, hasPrev, hasNext]);
+        }, [isOpen, onClose, onPrev, onNext]);
 
     useEffect(() => {
-        let timeout: NodeJS.Timeout;
-        const resetTimer = () => {
-            setControlsVisible(true);
-            clearTimeout(timeout);
-            timeout = setTimeout(() => setControlsVisible(false), 5000);
-        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleKeyDown]);
 
+    // Handle scroll lock
+    useEffect(() => {
         if (isOpen) {
-            document.addEventListener('mousemove', resetTimer);
-            document.addEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'hidden';
-            resetTimer();
+            // Start at top when opening new painting
+            window.scrollTo(0, 0);
         } else {
-            document.body.style.overflow = '';
+            document.body.style.overflow = 'unset';
         }
-
         return () => {
-            document.removeEventListener('mousemove', resetTimer);
-            document.removeEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = '';
-            clearTimeout(timeout);
+            document.body.style.overflow = 'unset';
         };
-    }, [isOpen, handleKeyDown]);
+    }, [isOpen, painting]); // Reset when painting changes too
 
-    if (!painting) return null;
+    if (!isOpen || !painting) return null;
+
+    const currentImage = activeImage || painting.image_url;
 
     return (
-        <div
-            className={`lightbox ${isOpen ? 'open' : ''} ${controlsVisible ? 'cursor-default' : 'cursor-none'} overflow-y-auto`}
-            onClick={onClose}
-        >
-            {/* Close Button */}
-            <button
-                className={`fixed top-4 right-4 p-3 text-white/80 hover:text-white transition-opacity duration-500 z-50 cursor-pointer ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}
-                onClick={onClose}
-                aria-label="Fechar"
-            >
-                <X className="w-8 h-8" />
-            </button>
+        <div className="fixed inset-0 z-50 flex flex-col bg-[var(--color-bg)]/95 backdrop-blur-md overflow-y-auto">
+            {/* Top Navigation Bar - Always Visible */}
+            <div className="sticky top-0 z-[60] flex items-center justify-between p-4 bg-[var(--color-bg)]/80 backdrop-blur-lg border-b border-[var(--color-border)]">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-[var(--glass-bg)] rounded-full transition-colors cursor-pointer"
+                        aria-label="Fechar"
+                    >
+                        <X className="w-6 h-6 text-[var(--color-text)]" />
+                    </button>
+                    <span className="font-heading font-medium text-lg hidden md:block">{painting.title}</span>
+                </div>
 
-            {/* Arrow Navigation */}
-            {hasPrev && (
-                <button
-                    className={`fixed left-4 top-1/2 -translate-y-1/2 p-3 text-white/60 hover:text-white transition-opacity duration-500 cursor-pointer z-50 ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}
-                    onClick={(e) => { e.stopPropagation(); onPrev(); }}
-                >
-                    <ChevronLeft className="w-10 h-10" />
-                </button>
-            )}
+                <div className="flex gap-2">
+                    <button
+                        onClick={onPrev}
+                        disabled={!hasPrev}
+                        className="p-2 hover:bg-[var(--glass-bg)] rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        aria-label="Anterior"
+                    >
+                        <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                        onClick={onNext}
+                        disabled={!hasNext}
+                        className="p-2 hover:bg-[var(--glass-bg)] rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        aria-label="Próximo"
+                    >
+                        <ChevronRight className="w-6 h-6" />
+                    </button>
+                </div>
+            </div>
 
-            {hasNext && (
-                <button
-                    className={`fixed right-4 top-1/2 -translate-y-1/2 p-3 text-white/60 hover:text-white transition-opacity duration-500 cursor-pointer z-50 ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}
-                    onClick={(e) => { e.stopPropagation(); onNext(); }}
-                >
-                    <ChevronRight className="w-10 h-10" />
-                </button>
+            {/* Fullscreen Overlay */}
+            {isFullscreen && (
+                <div className="fixed inset-0 z-[70] bg-black/95 flex items-center justify-center animate-in fade-in duration-300">
+                    <button
+                        onClick={() => setIsFullscreen(false)}
+                        className="fixed top-4 right-4 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full z-[80] transition-colors cursor-pointer"
+                    >
+                        <Minimize className="w-8 h-8" />
+                    </button>
+
+                    <TransformWrapper
+                        initialScale={1}
+                        minScale={1}
+                        maxScale={4}
+                        centerOnInit
+                    >
+                        <TransformComponent wrapperClass="!w-screen !h-screen" contentClass="!w-screen !h-screen flex items-center justify-center">
+                            <div className="relative w-full h-full flex items-center justify-center p-4">
+                                <Image
+                                    src={currentImage}
+                                    alt={painting.title}
+                                    fill
+                                    className="object-contain"
+                                    onClick={(e) => e.stopPropagation()}
+                                    priority
+                                    quality={100}
+                                />
+                            </div>
+                        </TransformComponent>
+                    </TransformWrapper>
+                </div>
             )}
 
             {/* Content Container - Allow scrolling for comments */}
@@ -165,17 +197,58 @@ export default function Lightbox({
                     {/* Glass Background */}
                     <div className="absolute inset-0 bg-[var(--glass-bg)] backdrop-blur-md border border-[var(--glass-border)] rounded-lg -z-10" />
 
-                    <Image
-                        src={painting.image_url}
-                        alt={painting.title}
-                        width={1200}
-                        height={1600}
-                        className="max-h-[80vh] w-auto object-contain shadow-2xl rounded-sm mb-6 mt-6"
-                        priority
-                    />
+                    <div
+                        className="relative cursor-zoom-in group w-full flex justify-center bg-black/5 min-h-[50vh] rounded-t-lg"
+                        onClick={() => setIsFullscreen(true)}
+                    >
+                        <div className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none flex items-center gap-2 text-sm">
+                            <Maximize className="w-4 h-4" /> Fullscreen
+                        </div>
+                        <Image
+                            src={currentImage}
+                            alt={painting.title}
+                            width={1200}
+                            height={800} // Aspect ratio agnostic
+                            className="max-h-[70vh] w-auto object-contain shadow-2xl rounded-sm mb-6 mt-6 transition-transform duration-500 hover:scale-[1.01]"
+                            priority
+                        />
+                    </div>
+
+                    {/* Thumbnail Strip (Gallery) */}
+                    {painting.gallery_images && painting.gallery_images.length > 0 && (
+                        <div className="flex gap-2 p-4 overflow-x-auto w-full max-w-4xl justify-center border-t border-[var(--glass-border)] bg-black/5">
+                            {/* Main Image Thumbnail */}
+                            <button
+                                onClick={() => setActiveImage(painting.image_url)}
+                                className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${activeImage === painting.image_url ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/30' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                            >
+                                <Image
+                                    src={painting.image_url}
+                                    alt="Principal"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </button>
+                            {/* Gallery Thumbnails */}
+                            {painting.gallery_images.map((img) => (
+                                <button
+                                    key={img.id}
+                                    onClick={() => setActiveImage(img.image_url)}
+                                    className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${activeImage === img.image_url ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/30' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                                >
+                                    <Image
+                                        src={img.image_url}
+                                        alt="Detalhe"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Info Panel within the scrollable flow */}
-                    <div className="w-full max-w-4xl px-6 pb-8 text-[var(--color-text)]">
+                    <div className="w-full max-w-4xl px-6 pb-8 text-[var(--color-text)] pt-8">
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-[var(--color-border)] pb-6">
                             <div>
                                 <h2 className="font-heading text-3xl font-bold mb-2">{painting.title}</h2>
@@ -230,9 +303,6 @@ export default function Lightbox({
                                 )}
                                 {painting.ai_description && (
                                     <div className="bg-[var(--glass-bg)] p-4 rounded-lg border border-[var(--color-border)]">
-                                        <h3 className="font-semibold mb-2 text-sm flex items-center gap-2">
-                                            ✨ Análise AI
-                                        </h3>
                                         <p className="text-sm text-[var(--color-text-muted)] italic leading-relaxed">
                                             {painting.ai_description}
                                         </p>

@@ -16,7 +16,7 @@ export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState<'paintings' | 'content'>('paintings');
+    const [activeTab, setActiveTab] = useState<'paintings' | 'content' | 'comments'>('paintings');
 
     // Painting State
     const [paintings, setPaintings] = useState<Painting[]>([]);
@@ -33,6 +33,11 @@ export default function AdminPage() {
     const [editingContentSlug, setEditingContentSlug] = useState<string | null>(null);
     const [contentForm, setContentForm] = useState<string>('');
 
+    // Comments State
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [commentsLoading, setCommentsLoading] = useState(false);
+    const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
+
     const [formData, setFormData] = useState<PaintingFormData>({
         title: '',
         description: '',
@@ -47,10 +52,19 @@ export default function AdminPage() {
     const fetchPaintings = useCallback(async () => {
         const { data } = await supabase
             .from('paintings')
-            .select('*')
+            .select('*, gallery_images:painting_gallery(*)')
             .order('display_order', { ascending: true });
 
-        if (data) setPaintings(data);
+        if (data) {
+            // Sort gallery images by created_at inside each painting
+            const sortedData = data.map((p: any) => ({
+                ...p,
+                gallery_images: p.gallery_images?.sort((a: any, b: any) =>
+                    new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                ) || []
+            }));
+            setPaintings(sortedData);
+        }
         setLoading(false);
     }, []);
 
@@ -65,10 +79,25 @@ export default function AdminPage() {
         setContentLoading(false);
     }, []);
 
+    const fetchComments = useCallback(async () => {
+        setCommentsLoading(true);
+        const { data } = await supabase
+            .from('comments')
+            .select(`
+                *,
+                paintings (title, image_url)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (data) setComments(data as any); // Type assertion needed due to join
+        setCommentsLoading(false);
+    }, []);
+
     useEffect(() => {
         if (isAuthenticated) {
             fetchPaintings();
             fetchContent();
+            fetchComments();
         }
     }, [isAuthenticated, fetchPaintings, fetchContent]);
 
@@ -109,6 +138,39 @@ export default function AdminPage() {
         } catch (err) {
             console.error('Error saving content:', err);
             alert('Erro ao guardar conteúdo.');
+        }
+    };
+
+    // --- Comment Handlers ---
+    const handleDeleteComment = async (id: string) => {
+        if (!confirm('Tem a certeza que quer eliminar este comentário?')) return;
+        try {
+            const { error } = await supabase.from('comments').delete().eq('id', id);
+            if (error) throw error;
+            setComments(comments.filter(c => c.id !== id));
+        } catch (err) {
+            alert('Erro ao eliminar comentário');
+            console.error(err);
+        }
+    };
+
+    const handleReplyComment = async (id: string) => {
+        const reply = replyText[id];
+        if (!reply) return;
+
+        try {
+            const { error } = await supabase
+                .from('comments')
+                .update({ reply })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            setComments(comments.map(c => c.id === id ? { ...c, reply } : c));
+            alert('Resposta enviada!');
+        } catch (err) {
+            alert('Erro ao enviar resposta');
+            console.error(err);
         }
     };
 
@@ -216,6 +278,141 @@ export default function AdminPage() {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao eliminar');
             setDeleteTarget(null);
+        }
+    };
+
+    const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>, paintingId: string) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        setError('');
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `gallery/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from(PAINTINGS_BUCKET)
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false,
+                    });
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from(PAINTINGS_BUCKET)
+                    .getPublicUrl(fileName);
+
+                const { error: insertError } = await supabase
+                    .from('painting_gallery')
+                    .insert({
+                        painting_id: paintingId,
+                        image_url: publicUrl,
+                    });
+
+                if (insertError) throw insertError;
+            }
+
+            // Refresh to show new images
+            fetchPaintings();
+            alert('Imagens de galeria adicionadas com sucesso!');
+        } catch (err) {
+            console.error('Gallery upload error:', err);
+            setError(err instanceof Error ? err.message : 'Erro ao carregar imagens de galeria');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDeleteGalleryImage = async (imageId: string, imageUrl: string) => {
+        if (!confirm('Apagar esta imagem da galeria?')) return;
+
+        try {
+            // Optional: Delete from storage
+            /*
+            const urlParts = imageUrl.split('/');
+            const fileName = `gallery/${urlParts[urlParts.length - 1]}`;
+            await supabase.storage.from(PAINTINGS_BUCKET).remove([fileName]);
+            */
+
+            const { error } = await supabase
+                .from('painting_gallery')
+                .delete()
+                .eq('id', imageId);
+
+            if (error) throw error;
+            fetchPaintings();
+        } catch (err) {
+            console.error('Error deleting gallery image:', err);
+            alert('Erro ao apagar imagem');
+        }
+    };
+
+    const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>, paintingId: string) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        setError('');
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `gallery/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from(PAINTINGS_BUCKET)
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false,
+                    });
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from(PAINTINGS_BUCKET)
+                    .getPublicUrl(fileName);
+
+                const { error: insertError } = await supabase
+                    .from('painting_gallery')
+                    .insert({
+                        painting_id: paintingId,
+                        image_url: publicUrl,
+                    });
+
+                if (insertError) throw insertError;
+            }
+
+            // Refresh to show new images
+            fetchPaintings();
+            alert('Imagens de galeria adicionadas com sucesso!');
+        } catch (err) {
+            console.error('Gallery upload error:', err);
+            setError(err instanceof Error ? err.message : 'Erro ao carregar imagens de galeria');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDeleteGalleryImage = async (imageId: string, imageUrl: string) => {
+        if (!confirm('Apagar esta imagem da galeria?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('painting_gallery')
+                .delete()
+                .eq('id', imageId);
+
+            if (error) throw error;
+            fetchPaintings();
+        } catch (err) {
+            console.error('Error deleting gallery image:', err);
+            alert('Erro ao apagar imagem');
         }
     };
 
@@ -349,6 +546,16 @@ export default function AdminPage() {
                         </div>
                         {activeTab === 'content' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--color-primary)]" />}
                     </button>
+                    <button
+                        onClick={() => setActiveTab('comments')}
+                        className={`pb-4 px-2 font-medium transition-colors relative ${activeTab === 'comments' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}`}
+                    >
+                        <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4" />
+                            Comentários
+                        </div>
+                        {activeTab === 'comments' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--color-primary)]" />}
+                    </button>
                 </div>
 
                 {/* TAB CONTENT: PAINTINGS */}
@@ -404,6 +611,46 @@ export default function AdminPage() {
                                                             />
                                                             Vendido
                                                         </label>
+                                                    </div>
+
+                                                    {/* Gallery Section in Edit Mode */}
+                                                    <div className="mt-4 pt-4 border-t border-[var(--glass-border)]">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <h4 className="text-sm font-medium">Galeria de Detalhes</h4>
+                                                            <label className="text-xs bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded cursor-pointer hover:bg-[var(--color-primary)]/20 transition-colors flex items-center gap-1">
+                                                                <Plus className="w-3 h-3" /> Adicionar Fotos
+                                                                <input
+                                                                    type="file"
+                                                                    multiple
+                                                                    accept="image/*"
+                                                                    className="hidden"
+                                                                    onChange={(e) => handleGalleryUpload(e, painting.id)}
+                                                                />
+                                                            </label>
+                                                        </div>
+
+                                                        {painting.gallery_images && painting.gallery_images.length > 0 ? (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {painting.gallery_images.map(img => (
+                                                                    <div key={img.id} className="relative group w-16 h-16 rounded overflow-hidden">
+                                                                        <Image
+                                                                            src={img.image_url}
+                                                                            alt="Detalhe"
+                                                                            fill
+                                                                            className="object-cover"
+                                                                        />
+                                                                        <button
+                                                                            onClick={() => handleDeleteGalleryImage(img.id, img.image_url)}
+                                                                            className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-xs text-[var(--color-text-muted)] italic">Sem imagens extra.</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ) : (

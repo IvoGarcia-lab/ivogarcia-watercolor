@@ -149,22 +149,26 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
             </div>
 
             {/* Collapsible Filter Curtain */}
-            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isFiltersOpen ? 'max-h-[500px] opacity-100 mb-8' : 'max-h-0 opacity-0'}`}>
-                <div className="p-1">
-                    <FilterBar
-                        activeCategory={activeCategory}
-                        onCategoryChange={setActiveCategory}
-                    />
-                </div>
-            </div>
+            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isFiltersOpen ? 'max-h-[800px] opacity-100 mb-8' : 'max-h-0 opacity-0'}`}>
+                <div className="p-1 space-y-6">
+                    <div>
+                        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] mb-3">Categorias</h3>
+                        <FilterBar
+                            activeCategory={activeCategory}
+                            onCategoryChange={setActiveCategory}
+                        />
+                    </div>
 
-            <div className="mt-4">
-                <KeywordFilter
-                    paintings={paintings}
-                    activeKeywords={activeKeywords}
-                    onKeywordToggle={handleKeywordToggle}
-                    onClearAll={() => setActiveKeywords([])}
-                />
+                    <div className="pt-6 border-t border-[var(--glass-border)]">
+                        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] mb-3">Palavras-chave IA</h3>
+                        <KeywordFilter
+                            paintings={paintings}
+                            activeKeywords={activeKeywords}
+                            onKeywordToggle={handleKeywordToggle}
+                            onClearAll={() => setActiveKeywords([])}
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Results count */}

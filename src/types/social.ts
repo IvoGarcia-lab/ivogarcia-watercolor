@@ -11,6 +11,7 @@ export interface Comment {
     painting_id: string;
     user_name: string;
     content: string;
+    reply?: string; // Admin reply
     is_approved: boolean;
     created_at: string;
 }
