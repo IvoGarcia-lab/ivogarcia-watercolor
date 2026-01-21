@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, PAINTINGS_BUCKET } from '@/lib/supabase';
-import { analyzePainting, isGeminiConfigured } from '@/lib/gemini';
+import { analyzePainting, isAIConfigured } from '@/lib/aiml';
 import { Upload, Trash2, Edit, X, Save, Plus, ArrowLeft, GripVertical, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -91,7 +91,7 @@ export default function AdminPage() {
 
             // AI Analysis - convert file to base64 and analyze
             let aiData = {};
-            if (isGeminiConfigured()) {
+            if (isAIConfigured()) {
                 setAnalyzing(true);
                 try {
                     const reader = new FileReader();
@@ -416,10 +416,10 @@ export default function AdminPage() {
                                             <span className="text-sm text-[var(--color-text-muted)]">
                                                 Clique para selecionar imagem
                                             </span>
-                                            {isGeminiConfigured() && (
+                                            {isAIConfigured() && (
                                                 <span className="text-xs text-[var(--color-primary)] mt-1 flex items-center gap-1">
                                                     <Sparkles className="w-3 h-3" />
-                                                    Análise IA automática
+                                                    Análise IA (Qwen3-VL)
                                                 </span>
                                             )}
                                         </>
