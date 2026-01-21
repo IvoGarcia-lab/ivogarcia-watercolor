@@ -94,7 +94,10 @@ export default function Lightbox({
                 onPrev();
                 break;
             case 'ArrowRight':
-        }, [isOpen, onClose, onPrev, onNext]);
+                onNext();
+                break;
+        }
+    }, [isOpen, onClose, onPrev, onNext]);
 
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown);
