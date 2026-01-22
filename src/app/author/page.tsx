@@ -4,8 +4,10 @@ import Navbar from '@/components/Navbar';
 import { Paintbrush, Heart, Award, BookOpen, Facebook, Instagram, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
+import { useAutoScroll } from '@/hooks/useAutoScroll';
 
 export default function AuthorPage() {
+    useAutoScroll(true, 8000, 0.3); // Idle 8s, Slow Speed 0.3
     const [bioContent, setBioContent] = useState<string>('');
     const [loading, setLoading] = useState(true);
 

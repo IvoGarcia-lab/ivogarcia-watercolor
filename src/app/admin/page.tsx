@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, PAINTINGS_BUCKET } from '@/lib/supabase';
 import { analyzePainting, isAIConfigured } from '@/lib/aiml';
-import { Upload, Trash2, Edit, X, Save, Plus, ArrowLeft, GripVertical, Sparkles, FileText, MessageSquare, Image as ImageIcon } from 'lucide-react';
+import { Upload, Trash2, Edit, X, Save, Plus, ArrowLeft, GripVertical, Sparkles, FileText, MessageSquare, Image as ImageIcon, Send } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Painting, PaintingFormData } from '@/types/painting';
@@ -37,6 +37,10 @@ export default function AdminPage() {
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentsLoading, setCommentsLoading] = useState(false);
     const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
+
+    // Batch Upload State
+    const [batchMode, setBatchMode] = useState(false);
+    const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0, currentFile: '' });
 
     const [formData, setFormData] = useState<PaintingFormData>({
         title: '',
@@ -253,6 +257,95 @@ export default function AdminPage() {
         } finally {
             setUploading(false);
             setAnalyzing(false);
+        }
+    };
+
+    // NEW: Batch Upload Handler
+    const handleBatchUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setBatchMode(true);
+        setUploading(true);
+        setError('');
+        setBatchProgress({ current: 0, total: files.length, currentFile: '' });
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+                const autoTitle = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+
+                setBatchProgress({ current: i + 1, total: files.length, currentFile: autoTitle });
+
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from(PAINTINGS_BUCKET)
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false,
+                    });
+
+                if (uploadError) {
+                    console.error(`Upload failed for ${file.name}:`, uploadError);
+                    continue; // Skip this file, continue with others
+                }
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from(PAINTINGS_BUCKET)
+                    .getPublicUrl(fileName);
+
+                // AI Analysis
+                let aiData = {};
+                if (isAIConfigured()) {
+                    setAnalyzing(true);
+                    try {
+                        const analysis = await analyzePainting(publicUrl);
+                        if (analysis) {
+                            aiData = {
+                                ai_description: analysis.description,
+                                ai_keywords: analysis.keywords,
+                                ai_mood: analysis.mood,
+                                ai_colors: analysis.colors,
+                            };
+                        }
+                    } catch (aiError) {
+                        console.error('AI analysis failed:', aiError);
+                    } finally {
+                        setAnalyzing(false);
+                    }
+                }
+
+                const { error: insertError } = await supabase
+                    .from('paintings')
+                    .insert({
+                        title: autoTitle,
+                        description: '',
+                        year: new Date().getFullYear(),
+                        technique: 'Aguarela sobre papel',
+                        category: 'Paisagem',
+                        is_sold: false,
+                        image_url: publicUrl,
+                        display_order: paintings.length + i,
+                        ...aiData,
+                    });
+
+                if (insertError) {
+                    console.error(`Insert failed for ${file.name}:`, insertError);
+                }
+            }
+
+            setShowUpload(false);
+            fetchPaintings();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao carregar imagens em lote');
+        } finally {
+            setUploading(false);
+            setAnalyzing(false);
+            setBatchMode(false);
+            setBatchProgress({ current: 0, total: 0, currentFile: '' });
         }
     };
 
@@ -621,6 +714,93 @@ export default function AdminPage() {
                             </div>
                         )}
                     </>
+
+                )}
+
+                {/* TAB CONTENT: COMMENTS */}
+                {activeTab === 'comments' && (
+                    <div className="space-y-6">
+                        {commentsLoading ? (
+                            <div className="grid gap-4">
+                                {[...Array(3)].map((_, i) => <div key={i} className="skeleton h-24 rounded-xl" />)}
+                            </div>
+                        ) : comments.length === 0 ? (
+                            <div className="glass-card p-12 text-center text-[var(--color-text-muted)]">
+                                <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                <p>Não há comentários para moderar.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {comments.map((comment) => (
+                                    <div key={comment.id} className="glass-card p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] font-bold">
+                                                    {comment.user_name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-heading font-semibold">{comment.user_name}</h3>
+                                                    <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                                                        <span>{new Date(comment.created_at).toLocaleDateString('pt-PT')}</span>
+                                                        <span>•</span>
+                                                        {comment.paintings ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <ImageIcon className="w-3 h-3" />
+                                                                Na obra: <span className="text-[var(--color-text)]">{comment.paintings.title}</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="italic">Geral</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleDeleteComment(comment.id)}
+                                                className="p-2 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                                                title="Eliminar Comentário"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+
+                                        <p className="text-[var(--color-text)] mb-4 pl-14 leading-relaxed">
+                                            {comment.content}
+                                        </p>
+
+                                        {/* Reply Section */}
+                                        <div className="pl-14">
+                                            {comment.reply ? (
+                                                <div className="bg-[var(--glass-bg)] p-4 rounded-xl border border-[var(--glass-border)] flex gap-3">
+                                                    <div className="w-1 h-full bg-[var(--color-primary)] rounded-full"></div>
+                                                    <div className="flex-1">
+                                                        <p className="text-xs text-[var(--color-primary)] font-bold mb-1 uppercase tracking-wider">A tua resposta</p>
+                                                        <p className="text-sm">{comment.reply}</p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Escrever resposta..."
+                                                        className="flex-1 px-4 py-2 rounded-lg bg-[var(--glass-bg)] border border-[var(--glass-border)] focus:border-[var(--color-primary)] focus:outline-none text-sm"
+                                                        value={replyText[comment.id] || ''}
+                                                        onChange={(e) => setReplyText({ ...replyText, [comment.id]: e.target.value })}
+                                                    />
+                                                    <button
+                                                        onClick={() => handleReplyComment(comment.id)}
+                                                        disabled={!replyText[comment.id]}
+                                                        className="p-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                                    >
+                                                        <Send className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {/* TAB CONTENT: CMS */}
@@ -754,6 +934,43 @@ export default function AdminPage() {
                                     )}
                                     <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileUpload} disabled={uploading || analyzing || !formData.title.trim()} className="hidden" />
                                 </label>
+
+                                {/* Batch Upload Option */}
+                                <div className="relative">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-[var(--glass-border)]"></div>
+                                    </div>
+                                    <div className="relative flex justify-center text-sm">
+                                        <span className="px-2 bg-[var(--color-surface)] text-[var(--color-text-muted)]">ou</span>
+                                    </div>
+                                </div>
+
+                                <label className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl transition-colors ${batchMode ? 'border-[var(--color-secondary)] bg-[var(--color-secondary)]/5' : 'border-[var(--glass-border)] hover:border-[var(--color-secondary)] cursor-pointer'}`}>
+                                    {batchMode ? (
+                                        <div className="w-full space-y-3">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--color-secondary)] font-medium">A processar em lote...</span>
+                                                <span className="text-[var(--color-text-muted)]">{batchProgress.current}/{batchProgress.total}</span>
+                                            </div>
+                                            <div className="w-full bg-[var(--glass-bg)] rounded-full h-2 overflow-hidden">
+                                                <div
+                                                    className="bg-[var(--color-secondary)] h-full transition-all duration-300"
+                                                    style={{ width: `${(batchProgress.current / batchProgress.total) * 100}%` }}
+                                                ></div>
+                                            </div>
+                                            <p className="text-xs text-center text-[var(--color-text-muted)] truncate">
+                                                {analyzing ? `A analisar: ${batchProgress.currentFile}` : `A carregar: ${batchProgress.currentFile}`}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Plus className="w-6 h-6 text-[var(--color-text-muted)] mb-2" />
+                                            <span className="text-sm text-[var(--color-text-muted)] font-medium">Upload em Lote (Múltiplas Fotos)</span>
+                                            <span className="text-xs text-[var(--color-text-muted)] mt-1 opacity-70">Títulos e análise IA gerados automaticamente</span>
+                                        </>
+                                    )}
+                                    <input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={handleBatchUpload} disabled={uploading || analyzing} className="hidden" />
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -776,6 +993,6 @@ export default function AdminPage() {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

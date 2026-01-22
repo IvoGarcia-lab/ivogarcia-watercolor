@@ -14,6 +14,10 @@ export interface Comment {
     reply?: string; // Admin reply
     is_approved: boolean;
     created_at: string;
+    paintings?: {
+        title: string;
+        image_url: string;
+    };
 }
 
 // Stats aggregation specific to a painting
