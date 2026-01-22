@@ -87,17 +87,24 @@ export default function AuthorPage() {
                             <div className="glass p-8 rounded-2xl border border-[var(--glass-border)] text-center relative overflow-hidden group">
                                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
-                                <div className="w-48 h-48 mx-auto bg-[var(--color-surface-active)] rounded-full flex items-center justify-center mb-8 shadow-inner relative z-10">
-                                    <span className="text-6xl grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">🎨</span>
+                                <div className="w-48 h-48 mx-auto bg-[var(--color-surface-active)] rounded-full mb-8 shadow-inner relative z-10 overflow-hidden">
+                                    <img
+                                        src="/images/bio.jpg"
+                                        alt="Ivo Garcia"
+                                        className="w-full h-full object-cover grayscale-0 opacity-100 group-hover:scale-105 transition-all duration-500"
+                                    />
                                 </div>
 
                                 <h3 className="font-heading text-xl font-medium mb-1">Ivo Garcia</h3>
                                 <p className="text-sm text-[var(--color-text-muted)] mb-8 uppercase tracking-widest text-[10px]">Aguarelista</p>
 
                                 <div className="space-y-4">
-                                    <a href="mailto:aguarela@3dhr.pt" className="flex items-center justify-center gap-3 p-3 rounded-xl bg-[var(--glass-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 group/link border border-[var(--glass-border)]">
-                                        <Mail className="w-4 h-4" />
-                                        <span className="text-sm font-medium">Contactar por Email</span>
+                                    <a href="mailto:ivogarcia.arte@gmail.com" className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-[var(--glass-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 group/link border border-[var(--glass-border)] w-full">
+                                        <div className="flex items-center gap-2">
+                                            <Mail className="w-4 h-4" />
+                                            <span className="text-sm font-medium">Contactar por Email</span>
+                                        </div>
+                                        <span className="text-xs text-[var(--color-text-muted)] group-hover/link:text-white/80">ivogarcia.arte@gmail.com</span>
                                     </a>
                                     <div className="flex gap-4 justify-center pt-4">
                                         <a href="https://www.instagram.com/ivo_garcia_2023/" target="_blank" rel="noopener noreferrer" className="p-3 rounded-full hover:bg-[#E4405F]/10 hover:text-[#E4405F] transition-colors cursor-pointer"><Instagram className="w-5 h-5" /></a>

@@ -60,7 +60,9 @@ export default function PaintingCard({ painting, onClick, index }: PaintingCardP
                                 </span>
                             )}
                             <a
-                                href={`mailto:aguarela@3dhr.pt?subject=Interesse na obra "${painting.title}"&body=Olá, tenho interesse na obra "${painting.title}"${painting.price ? ` (€${painting.price})` : ''}. Gostaria de obter mais informações.`}
+                                href={`mailto:ivogarcia.arte@gmail.com?subject=Interesse na obra "${painting.title}"&body=Olá, tenho interesse na obra "${painting.title}"${painting.price ? ` (€${painting.price})` : ''}. Gostaria de obter mais informações.`}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
                                 className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] rounded-full transition-colors"
                             >

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         // Email Content
         const mailOptions = {
             from: `"Site IvoGarcia Arte" <${process.env.SMTP_USER || 'info@ivogarcia.pt'}>`,
-            to: 'aguarela@3dhr.pt', // Target email
+            to: 'ivogarcia.arte@gmail.com', // Target email (Updated per user request)
             replyTo: email,
             subject: `Nova Mensagem de ${name} - Portfólio`,
             html: `
