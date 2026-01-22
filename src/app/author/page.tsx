@@ -79,17 +79,6 @@ export default function AuthorPage() {
                                     </div>
                                 )}
 
-                                <div className="mt-12 flex items-center gap-6 pt-8 border-t border-[var(--glass-border)]">
-                                    <div className="flex flex-col">
-                                        <span className="text-3xl font-heading font-bold text-[var(--color-primary)]">15+</span>
-                                        <span className="text-xs uppercase tracking-wider opacity-60">Anos de Experiencia</span>
-                                    </div>
-                                    <div className="w-[1px] h-10 bg-[var(--glass-border)]"></div>
-                                    <div className="flex flex-col">
-                                        <span className="text-3xl font-heading font-bold text-[var(--color-primary)]">500+</span>
-                                        <span className="text-xs uppercase tracking-wider opacity-60">Obras Vendidas</span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -103,7 +92,7 @@ export default function AuthorPage() {
                                 </div>
 
                                 <h3 className="font-heading text-xl font-medium mb-1">Ivo Garcia</h3>
-                                <p className="text-sm text-[var(--color-text-muted)] mb-8 uppercase tracking-widest text-[10px]">Aguarelista Profissional</p>
+                                <p className="text-sm text-[var(--color-text-muted)] mb-8 uppercase tracking-widest text-[10px]">Aguarelista</p>
 
                                 <div className="space-y-4">
                                     <a href="mailto:aguarela@3dhr.pt" className="flex items-center justify-center gap-3 p-3 rounded-xl bg-[var(--glass-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 group/link border border-[var(--glass-border)]">
@@ -111,8 +100,7 @@ export default function AuthorPage() {
                                         <span className="text-sm font-medium">Contactar por Email</span>
                                     </a>
                                     <div className="flex gap-4 justify-center pt-4">
-                                        <a href="https://www.instagram.com/ivo_garcia_2023/" target="_blank" rel="noopener noreferrer" className="p-3 rounded-full hover:bg-[#E4405F]/10 hover:text-[#E4405F] transition-colors"><Instagram className="w-5 h-5" /></a>
-                                        <a href="#" className="p-3 rounded-full hover:bg-[#1877F2]/10 hover:text-[#1877F2] transition-colors"><Facebook className="w-5 h-5" /></a>
+                                        <a href="https://www.instagram.com/ivo_garcia_2023/" target="_blank" rel="noopener noreferrer" className="p-3 rounded-full hover:bg-[#E4405F]/10 hover:text-[#E4405F] transition-colors cursor-pointer"><Instagram className="w-5 h-5" /></a>
                                     </div>
                                 </div>
                             </div>

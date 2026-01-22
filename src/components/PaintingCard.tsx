@@ -48,10 +48,25 @@ export default function PaintingCard({ painting, onClick, index }: PaintingCardP
                             {painting.ai_mood}
                         </span>
                     )}
-                    {painting.is_sold && (
+                    {painting.is_sold ? (
                         <span className="px-2 py-0.5 text-xs font-medium bg-red-500/80 rounded-full">
                             Vendido
                         </span>
+                    ) : (
+                        <>
+                            {painting.price && painting.price > 0 && (
+                                <span className="px-2 py-0.5 text-xs font-semibold bg-emerald-500/80 rounded-full">
+                                    €{painting.price}
+                                </span>
+                            )}
+                            <a
+                                href={`mailto:aguarela@3dhr.pt?subject=Interesse na obra "${painting.title}"&body=Olá, tenho interesse na obra "${painting.title}"${painting.price ? ` (€${painting.price})` : ''}. Gostaria de obter mais informações.`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] rounded-full transition-colors"
+                            >
+                                Reservar
+                            </a>
+                        </>
                     )}
                 </div>
             </div>

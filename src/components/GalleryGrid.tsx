@@ -8,6 +8,7 @@ import Lightbox from './Lightbox';
 import GalleryCarousel from './GalleryCarousel';
 import type { Painting } from '@/types/painting';
 import { LayoutGrid, List, SortAsc, SortDesc, GalleryHorizontal } from 'lucide-react';
+import { useAutoScroll } from '@/hooks/useAutoScroll';
 
 interface GalleryGridProps {
     paintings: Painting[];
@@ -20,8 +21,12 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
     const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [sortBy, setSortBy] = useState<SortOption>('year-desc');
-    const [viewMode, setViewMode] = useState<'grid' | 'list' | 'carousel'>('carousel');
+    const [viewMode, setViewMode] = useState<'grid' | 'list' | 'carousel'>('grid');
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+    const [isKeywordsOpen, setIsKeywordsOpen] = useState(false);
+
+    // Auto-scroll when idle
+    useAutoScroll(true, 3000, 0.7);
 
     // Handle keyword toggle
     const handleKeywordToggle = (keyword: string) => {
@@ -159,14 +164,36 @@ export default function GalleryGrid({ paintings }: GalleryGridProps) {
                         />
                     </div>
 
+
                     <div className="pt-6 border-t border-[var(--glass-border)]">
-                        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] mb-3">Palavras-chave IA</h3>
-                        <KeywordFilter
-                            paintings={paintings}
-                            activeKeywords={activeKeywords}
-                            onKeywordToggle={handleKeywordToggle}
-                            onClearAll={() => setActiveKeywords([])}
-                        />
+                        <button
+                            onClick={() => setIsKeywordsOpen(!isKeywordsOpen)}
+                            className="flex items-center justify-between w-full text-sm font-semibold text-[var(--color-text-muted)] mb-3 hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+                        >
+                            <span>Palavras-chave IA</span>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className={`transition-transform duration-300 ${isKeywordsOpen ? 'rotate-180' : ''}`}
+                            >
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isKeywordsOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <KeywordFilter
+                                paintings={paintings}
+                                activeKeywords={activeKeywords}
+                                onKeywordToggle={handleKeywordToggle}
+                                onClearAll={() => setActiveKeywords([])}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

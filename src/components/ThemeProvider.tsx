@@ -21,12 +21,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         // Check localStorage first
         const savedTheme = localStorage.getItem('theme') as Theme | null;
         if (savedTheme) {
-            setThemeState(savedTheme);
-            document.documentElement.setAttribute('data-theme', savedTheme);
+            setThemeState('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
         } else {
             // Check system preference
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const initialTheme = prefersDark ? 'dark' : 'light';
+            const initialTheme = 'dark'; // Force default dark
             setThemeState(initialTheme);
             document.documentElement.setAttribute('data-theme', initialTheme);
         }
