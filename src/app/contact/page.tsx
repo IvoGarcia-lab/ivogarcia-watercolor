@@ -100,10 +100,10 @@ export default function ContactPage() {
                                         <div>
                                             <h3 className="font-medium mb-1">Email</h3>
                                             <a
-                                                href="mailto:contato@ivogarcia.pt"
+                                                href="mailto:aguarela@3dhr.pt"
                                                 className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
                                             >
-                                                contato@ivogarcia.pt
+                                                aguarela@3dhr.pt
                                             </a>
                                         </div>
                                     </div>
@@ -117,10 +117,10 @@ export default function ContactPage() {
                                         <div>
                                             <h3 className="font-medium mb-1">Telefone</h3>
                                             <a
-                                                href="tel:+351912345678"
+                                                href="tel:+351914238671"
                                                 className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
                                             >
-                                                +351 912 345 678
+                                                +351 914 238 671
                                             </a>
                                         </div>
                                     </div>
@@ -134,7 +134,7 @@ export default function ContactPage() {
                                         <div>
                                             <h3 className="font-medium mb-1">Localização</h3>
                                             <p className="text-[var(--color-text-muted)]">
-                                                Lisboa, Portugal
+                                                Matosinhos, Portugal
                                             </p>
                                         </div>
                                     </div>
@@ -145,7 +145,9 @@ export default function ContactPage() {
                                     <h3 className="font-medium mb-4">Redes Sociais</h3>
                                     <div className="flex gap-3">
                                         <a
-                                            href="#"
+                                            href="https://www.instagram.com/ivo_garcia_2023/"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             className="w-12 h-12 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center hover:bg-[var(--color-primary)] hover:text-white transition-all cursor-pointer"
                                             aria-label="Instagram"
                                         >

@@ -106,12 +106,12 @@ export default function AuthorPage() {
                                 <p className="text-sm text-[var(--color-text-muted)] mb-8 uppercase tracking-widest text-[10px]">Aguarelista Profissional</p>
 
                                 <div className="space-y-4">
-                                    <a href="mailto:info@ivogarcia.pt" className="flex items-center justify-center gap-3 p-3 rounded-xl bg-[var(--glass-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 group/link border border-[var(--glass-border)]">
+                                    <a href="mailto:aguarela@3dhr.pt" className="flex items-center justify-center gap-3 p-3 rounded-xl bg-[var(--glass-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 group/link border border-[var(--glass-border)]">
                                         <Mail className="w-4 h-4" />
                                         <span className="text-sm font-medium">Contactar por Email</span>
                                     </a>
                                     <div className="flex gap-4 justify-center pt-4">
-                                        <a href="#" className="p-3 rounded-full hover:bg-[#E4405F]/10 hover:text-[#E4405F] transition-colors"><Instagram className="w-5 h-5" /></a>
+                                        <a href="https://www.instagram.com/ivo_garcia_2023/" target="_blank" rel="noopener noreferrer" className="p-3 rounded-full hover:bg-[#E4405F]/10 hover:text-[#E4405F] transition-colors"><Instagram className="w-5 h-5" /></a>
                                         <a href="#" className="p-3 rounded-full hover:bg-[#1877F2]/10 hover:text-[#1877F2] transition-colors"><Facebook className="w-5 h-5" /></a>
                                     </div>
                                 </div>
