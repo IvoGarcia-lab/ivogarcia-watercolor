@@ -641,6 +641,18 @@ export default function AdminPage() {
                                                             Vendido
                                                         </label>
                                                     </div>
+                                                    <div className="flex gap-2 items-center">
+                                                        <label className="text-sm text-[var(--color-text-muted)]">Preço (€):</label>
+                                                        <input
+                                                            type="number"
+                                                            value={painting.price || ''}
+                                                            onChange={(e) => setPaintings(paintings.map(p => p.id === painting.id ? { ...p, price: e.target.value ? parseFloat(e.target.value) : null } : p))}
+                                                            className="w-24 px-3 py-1.5 rounded-lg bg-[var(--glass-bg)] border border-[var(--glass-border)] focus:border-[var(--color-primary)] focus:outline-none text-sm"
+                                                            placeholder="0.00"
+                                                            step="0.01"
+                                                            min="0"
+                                                        />
+                                                    </div>
 
                                                     {/* Gallery Section in Edit Mode */}
                                                     <div className="mt-4 pt-4 border-t border-[var(--glass-border)]">
