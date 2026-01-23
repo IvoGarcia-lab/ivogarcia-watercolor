@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import type { Painting } from '@/types/painting';
 
@@ -15,6 +14,11 @@ export default function PaintingCard({ painting, onClick, index }: PaintingCardP
     const [isLoaded, setIsLoaded] = useState(false);
 
     const staggerClass = `stagger-${(index % 5) + 1}`;
+
+    const handleMoreInfo = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        alert('Para mais informações sobre esta obra, por favor visite a página de Contacto e envie-me uma mensagem!');
+    };
 
     return (
         <article
@@ -60,13 +64,13 @@ export default function PaintingCard({ painting, onClick, index }: PaintingCardP
                                     €{painting.price}
                                 </span>
                             )}
-                            <Link
-                                href="/contact"
-                                onClick={(e) => e.stopPropagation()}
-                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white rounded-full transition-colors w-full text-center mt-1 cursor-pointer block"
+                            <button
+                                type="button"
+                                onClick={handleMoreInfo}
+                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white rounded-full transition-colors w-full text-center mt-1 cursor-pointer"
                             >
                                 Mais Informações
-                            </Link>
+                            </button>
                         </>
                     )}
                 </div>
