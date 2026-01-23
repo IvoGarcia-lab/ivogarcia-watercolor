@@ -254,13 +254,29 @@ export default function Lightbox({
                             </div>
 
                             {/* Ratings */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xl font-bold">{averageRating}</span>
-                                        <StarRating size="md" initialRating={Math.round(averageRating)} readOnly onRate={() => { }} />
-                                    </div>
-                                    <span className="text-xs text-[var(--color-text-muted)]">({totalRatings} avaliações)</span>
+                            <div className="flex flex-col items-end gap-1">
+                                {!painting.is_sold && (
+                                    <>
+                                        {painting.price && painting.price > 0 && (
+                                            <span className="text-xl font-bold text-[var(--color-primary)] mb-1">
+                                                €{painting.price}
+                                            </span>
+                                        )}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                window.location.href = `mailto:aguarela@3dhr.pt?subject=Pedido de informação: obra "${painting.title}"&body=Olá, gostaria de saber mais detalhes sobre a obra "${painting.title}"${painting.price ? ` (Valor listado: €${painting.price})` : ''}. Por favor, entrem em contacto.`;
+                                            }}
+                                            className="px-4 py-1.5 text-xs font-bold bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white rounded-full transition-colors mb-2 cursor-pointer shadow-sm hover:shadow-md"
+                                        >
+                                            Mais Informações
+                                        </button>
+                                    </>
+                                )}
+
+                                <div className="flex items-center gap-2">
+                                    <span className="text-2xl font-bold">{averageRating}</span>
+                                    <span className="text-sm text-[var(--color-text-muted)]">({totalRatings})</span>
                                 </div>
 
                                 {painting.is_sold && (
