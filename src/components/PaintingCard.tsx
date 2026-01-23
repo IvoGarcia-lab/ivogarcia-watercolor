@@ -59,15 +59,15 @@ export default function PaintingCard({ painting, onClick, index }: PaintingCardP
                                     €{painting.price}
                                 </span>
                             )}
-                            <a
-                                href={`mailto:aguarela@3dhr.pt?subject=Pedido de informação: obra "${painting.title}"&body=Olá, gostaria de saber mais detalhes sobre a obra "${painting.title}"${painting.price ? ` (Valor listado: €${painting.price})` : ''}. Por favor, entrem em contacto.`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white rounded-full transition-colors w-full text-center mt-1"
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.location.href = `mailto:aguarela@3dhr.pt?subject=Pedido de informação: obra "${painting.title}"&body=Olá, gostaria de saber mais detalhes sobre a obra "${painting.title}"${painting.price ? ` (Valor listado: €${painting.price})` : ''}. Por favor, entrem em contacto.`;
+                                }}
+                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white rounded-full transition-colors w-full text-center mt-1 cursor-pointer"
                             >
                                 Mais Informações
-                            </a>
+                            </button>
                         </>
                     )}
                 </div>
