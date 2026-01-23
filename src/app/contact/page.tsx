@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
-import { Mail, MapPin, Phone, Send, Instagram, Facebook } from 'lucide-react';
+import { Mail, MapPin, Phone, Send, Instagram } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function ContactPage() {
@@ -153,13 +153,7 @@ export default function ContactPage() {
                                         >
                                             <Instagram className="w-5 h-5" />
                                         </a>
-                                        <a
-                                            href="#"
-                                            className="w-12 h-12 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center hover:bg-[var(--color-primary)] hover:text-white transition-all cursor-pointer"
-                                            aria-label="Facebook"
-                                        >
-                                            <Facebook className="w-5 h-5" />
-                                        </a>
+
                                     </div>
                                 </div>
                             </div>

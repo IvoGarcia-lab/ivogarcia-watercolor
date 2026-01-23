@@ -1,7 +1,7 @@
 'use client';
 
 import Navbar from '@/components/Navbar';
-import { Paintbrush, Heart, Award, BookOpen, Facebook, Instagram, Mail } from 'lucide-react';
+import { Paintbrush, Heart, Award, BookOpen, Instagram, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { useAutoScroll } from '@/hooks/useAutoScroll';
@@ -99,14 +99,14 @@ export default function AuthorPage() {
                                 <p className="text-sm text-[var(--color-text-muted)] mb-8 uppercase tracking-widest text-[10px]">Aguarelista</p>
 
                                 <div className="space-y-4">
-                                    <a href="mailto:ivogarcia.arte@gmail.com" className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-[var(--glass-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 group/link border border-[var(--glass-border)] w-full">
+                                    <a href="mailto:aguarela@3dhr.pt" className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-[var(--glass-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 group/link border border-[var(--glass-border)] w-full">
                                         <div className="flex items-center gap-2">
                                             <Mail className="w-4 h-4" />
                                             <span className="text-sm font-medium">Contactar por Email</span>
                                         </div>
-                                        <span className="text-xs text-[var(--color-text-muted)] group-hover/link:text-white/80">ivogarcia.arte@gmail.com</span>
+                                        <span className="text-xs text-[var(--color-text-muted)] group-hover/link:text-white/80">aguarela@3dhr.pt</span>
                                     </a>
-                                    <div className="flex gap-4 justify-center pt-4">
+                                    <div className="flex gap-4 justify-center pt-4 relative z-20">
                                         <a href="https://www.instagram.com/ivo_garcia_2023/" target="_blank" rel="noopener noreferrer" className="p-3 rounded-full hover:bg-[#E4405F]/10 hover:text-[#E4405F] transition-colors cursor-pointer"><Instagram className="w-5 h-5" /></a>
                                     </div>
                                 </div>
