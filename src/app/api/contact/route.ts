@@ -16,18 +16,18 @@ export async function POST(request: Request) {
         // Configure Transporter (Use Environment Variables for Production)
         // For development without env vars, this will likely fail or needs Ethereal
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.hostinger.com', // Default Hostinger
-            port: parseInt(process.env.SMTP_PORT || '465'),
-            secure: true, // true for 465, false for other ports
+            host: 'smtp.hostinger.com',
+            port: 465,
+            secure: true,
             auth: {
-                user: process.env.SMTP_USER || 'info@ivogarcia.pt', // Placeholder
-                pass: process.env.SMTP_PASS,
+                user: 'aguarela@3dhr.pt',
+                pass: 'Arte2013@arte',
             },
         });
 
         // Email Content
         const mailOptions = {
-            from: `"Site IvoGarcia Arte" <${process.env.SMTP_USER || 'info@ivogarcia.pt'}>`,
+            from: `"Site IvoGarcia Arte" <aguarela@3dhr.pt>`,
             to: 'aguarela@3dhr.pt', // Target email (Reverted per user request)
             replyTo: email,
             subject: `Nova Mensagem de ${name} - Portfólio`,
