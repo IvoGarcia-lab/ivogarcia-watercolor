@@ -60,13 +60,13 @@ export default function PaintingCard({ painting, onClick, index }: PaintingCardP
                                 </span>
                             )}
                             <a
-                                href={`mailto:aguarela@3dhr.pt?subject=Interesse na obra "${painting.title}"&body=Olá, tenho interesse na obra "${painting.title}"${painting.price ? ` (€${painting.price})` : ''}. Gostaria de obter mais informações.`}
+                                href={`mailto:aguarela@3dhr.pt?subject=Pedido de informação: obra "${painting.title}"&body=Olá, gostaria de saber mais detalhes sobre a obra "${painting.title}"${painting.price ? ` (Valor listado: €${painting.price})` : ''}. Por favor, entrem em contacto.`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] rounded-full transition-colors"
+                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white rounded-full transition-colors w-full text-center mt-1"
                             >
-                                Reservar
+                                Mais Informações
                             </a>
                         </>
                     )}
