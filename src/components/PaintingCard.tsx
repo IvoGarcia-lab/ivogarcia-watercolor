@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import type { Painting } from '@/types/painting';
 
@@ -59,15 +60,13 @@ export default function PaintingCard({ painting, onClick, index }: PaintingCardP
                                     €{painting.price}
                                 </span>
                             )}
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.location.href = `mailto:aguarela@3dhr.pt?subject=Pedido de informação: obra "${painting.title}"&body=Olá, gostaria de saber mais detalhes sobre a obra "${painting.title}"${painting.price ? ` (Valor listado: €${painting.price})` : ''}. Por favor, entrem em contacto.`;
-                                }}
-                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white rounded-full transition-colors w-full text-center mt-1 cursor-pointer"
+                            <Link
+                                href="/contact"
+                                onClick={(e) => e.stopPropagation()}
+                                className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white rounded-full transition-colors w-full text-center mt-1 cursor-pointer block"
                             >
                                 Mais Informações
-                            </button>
+                            </Link>
                         </>
                     )}
                 </div>
@@ -75,3 +74,4 @@ export default function PaintingCard({ painting, onClick, index }: PaintingCardP
         </article>
     );
 }
+
